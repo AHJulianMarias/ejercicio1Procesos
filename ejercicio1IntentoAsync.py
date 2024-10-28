@@ -1,8 +1,11 @@
+from os import system
 import psutil
 import asyncio
+import time
+import keyboard
 import sys
-# El comentario que incluye fmt: off/on es para desactivar el formatter que me hace cosas raras si no
-def ejercicio1():
+
+async def ejercicio1():
         notepadPid = None
         # Iteramos para encontrar el proceso del bloc de notas
         # fmt:off
@@ -26,19 +29,19 @@ def ejercicio1():
             # fmt:off
             print(f"\nEl bloc de notas no se encuentra en ejecución")
             # fmt : on
-
         # dentro de un while True para obligar a que se cumple correctamente esta parte del codigo
         while True:
             try:
                 # Si introduces un string en vez de un numero, salta la excepción
-                # fmt:off
-                pidTerminar = int(input("\n¿Qué proceso quieres terminar? Si introduces un 0 el proceso terminará.\n"))
-                if pidTerminar == 0:
-                    sys.exit()
+                pidTerminar = int(input("\n¿Qué proceso quieres terminar?\n"))
+                # Si no salta la excepción salimos del bucle
                 break
             except ValueError:
+                # El comentario que incluye fmt: off/on es para desactivar el formatter que me hace cosas raras si no
                 # fmt: off
                 print(f"El valor introducido es diferente a un numero, introduce un número por favor.")
+                # fmt: on
+
             except Exception as e:
                 # Si es un error diferente a ValueError, capturamos la excepcion para poder realizar mejor control en un futuro
                 # fmt:off
@@ -65,11 +68,22 @@ def ejercicio1():
             print(f"Numero de proceso ({pidTerminar}) no encontrado.")
 
 
+async def cancelarTodasTask():
+    # https://superfastpython.com/asyncio-kill-all-tasks/#How_to_Kill_All_Asyncio_Tasks
+
+    print("Pulsa la tecla ESC para terminar los dos procesos")
+
+    # https://stackoverflow.com/questions/74326247/how-to-detect-keypress-in-python-using-keyboard-module
+    keyboard.wait("esc")
+    tasks = asyncio.all_tasks()
+    for task in tasks:
+        task.cancel()
 
 
-def main():
-    ejercicio1()
+async def main():
+    # No consigo hacerlo funcionar, no entiendo por que no se ejecutan a la vez cuando se supone que si deberia
+    await asyncio.gather(ejercicio1(), cancelarTodasTask())
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
